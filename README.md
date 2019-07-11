@@ -1,5 +1,5 @@
-# SimpleGAN
-A simple example of a Generative Adversarial Network
+# General Adversarial Networks
+Simple examples of a Generative Adversarial Network
 
 An example of a GAN generating the MNIST dataset after 100 epochs
 
