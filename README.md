@@ -7,4 +7,4 @@ An example of a GAN generating the MNIST dataset after 100 epochs
 
 An example running the CIFAR10 dataset after ~120 epochs
 
-![alt text](https://github.com/charlieproodle/General-Adversarial-Networks/blob/master/CIFAR10/cifar10.gif)
+![alt text](https://github.com/charlieproodle/General-Adversarial-Networks/blob/master/CIFAR10/images/generated_plot_epoch_121.png)
