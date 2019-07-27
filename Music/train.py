@@ -1,4 +1,5 @@
 import time
+import datetime
 import numpy as np
 from music21 import stream
 
@@ -48,7 +49,7 @@ def generate_fake_samples(generator, latent_dim, n):
     return x, y
 
 
-def create_midi(prediction_output, filename):
+def create_sample(prediction_output, filename):
     offset = 0
     output_notes = []
 
@@ -107,18 +108,23 @@ def summarize_performance(epoch, input_notes, generator, latent_dim=1000):
     # pred_notes = [int_to_note[int(x)] for x in pred_notes]
     pred_notes = [x for x in pred_notes]
 
+    # Save the generator weights
+    filename = "weights/generator_model_%03d.h5" % (epoch)
+    generator.save(filename)
+
     filename = "sample_epoch_%s" % str(epoch)
 
-    # Create a midi file
-    create_midi(pred_notes, filename)
+    # Create a midi sample
+    create_midi_sample(pred_notes, filename)
 
 
-def plot_progress(disc_loss, gen_loss):
+def plot_progress(disc_loss, gen_loss, epochs):
     plt.plot(self.disc_loss, c='red')
     plt.plot(self.gen_loss, c='blue')
     plt.title("GAN Loss per Epoch")
     plt.legend(['Discriminator', 'Generator'])
     plt.xlabel('Epoch')
+    plt.xlim(0, epochs)
     plt.ylabel('Loss')
     plt.savefig('GAN_Loss_per_Epoch_final.png', transparent=True)
     plt.close()
@@ -146,12 +152,8 @@ def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=
         # Get real samples
         x_real, y_real = generate_real_samples(dataset, batch_size)
 
-        # print("Generate Real Samples complete.")
-
         # Update discriminator relative to REAL
         d_loss_real, _ = discriminator.train_on_batch(x_real, y_real)
-
-        # print("Discriminator loss calculation complete.")
 
         # Get fake samples
         x_fake, y_fake = generate_fake_samples(
@@ -184,7 +186,7 @@ def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=
 
         # Estimate completion time
         print("[INFO] Estimated completion time: %s seconds" %
-              str(time_per_epoch * epochs))
+              str(datetime.timedelta(seconds = time_per_epoch * epochs)))
 
         disc_loss.append(d_loss_total)
         gen_loss.append(g_loss)
@@ -192,7 +194,7 @@ def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=
         if epoch % sample_interval == 0:
             summarize_performance(epoch, notes, generator)
 
-    plot_progress(d_loss, g_loss)
+    plot_progress(d_loss, g_loss, epochs)
 
 
 dataset, notes = load_notes()
