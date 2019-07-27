@@ -15,7 +15,6 @@ def load_cifar():
     x = (x - 127.5) / 127.5
     return x
 
-
 def generate_real_samples(dataset, n):
     # Random n samples
     index = np.random.randint(0, dataset.shape[0], n)
@@ -55,7 +54,6 @@ def save_plot(examples, epoch, n = 4):
     plt.savefig(filename)
     plt.close()
 
-
 def summarise_performance(epoch, generator, discriminator, dataset, latent_dim, n=150):
     # Get real samples
     x_real, y_real = generate_real_samples(dataset, n)
@@ -73,8 +71,6 @@ def summarise_performance(epoch, generator, discriminator, dataset, latent_dim, 
     # Save generator
     filename = 'weights/generator_model_%03d.h5' % (epoch + 1)
     generator.save(filename)
-
-
 
 def train(generator, discriminator, gan, dataset, latent_dim, epochs=200, batch_size=128):
     # Split batches up
