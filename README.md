@@ -1,4 +1,4 @@
-# General Adversarial Networks
+# Generative Adversarial Networks
 Simple examples of a Generative Adversarial Network
 
 An example of a GAN generating the MNIST dataset after 100 epochs
