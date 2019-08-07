@@ -5,7 +5,7 @@ from models import Models
 import math
 
 # Define the latent space
-latent_dim = 5
+latent_dim = 10
 
 # This gets all the models from the models import
 models = Models()
@@ -24,7 +24,7 @@ def generate_real_samples(n):
     y = np.ones((n, 1))
     return x, y
 
-# Generate the latent points for the generator 
+# Generate the latent points for the generator
 def generate_latent_points(latent_dim, n):
     # Use the normal distribution to randomly create points
     x = np.random.randn(latent_dim * n)

@@ -7,8 +7,8 @@ import numpy as np
 
 class Models():
 
-    def __init__(self, rows):
-        self.seq_length = rows
+    def __init__(self):
+        self.seq_length = 100
         self.seq_shape = (self.seq_length, 1)
         self.latent_dim = 1000
 
