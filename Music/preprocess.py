@@ -4,12 +4,14 @@ from music21 import converter, instrument, note, chord
 
 from keras.utils import np_utils
 
+
 def get_notes(filepath):
 
     # Define empty note list
     notes = []
 
     for file in glob.glob("%s/*.mid" % filepath):
+        # Convert file into a music21 object
         midi = converter.parse(file)
         print("Parsing %s" % file)
 
@@ -22,7 +24,7 @@ def get_notes(filepath):
         except:
             notes_to_parse = midi.flat.notes
 
-
+        # Is it a Note or a Chord?
         for element in notes_to_parse:
             if isinstance(element, note.Note):
                 notes.append(str(element.pitch))
@@ -30,6 +32,7 @@ def get_notes(filepath):
                 notes.append(".".join(str(n) for n in element.normalOrder))
 
     return notes
+
 
 def prepare_sequences(notes):
 
@@ -42,7 +45,8 @@ def prepare_sequences(notes):
     pitchnames = sorted(set(item for item in notes))
 
     # Create a dictionary to map pitches to integers
-    note_to_int = dict((note, number) for number, note in enumerate(pitchnames))
+    note_to_int = dict((note, number)
+                       for number, note in enumerate(pitchnames))
 
     network_input = []
     network_output = []
@@ -60,7 +64,7 @@ def prepare_sequences(notes):
     network_input = np.reshape(network_input, (n_patterns, sequence_length, 1))
 
     # Normalize input between -1 and 1
-    network_input = (network_input - float(n_vocab)/2) / (float(n_vocab)/2)
+    network_input = (network_input - float(n_vocab) / 2) / (float(n_vocab) / 2)
     network_output = np_utils.to_categorical(network_output)
 
     return (network_input, network_output)

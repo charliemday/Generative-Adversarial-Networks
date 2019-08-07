@@ -1,10 +1,9 @@
 import time
+import math
 import datetime
 import numpy as np
 from music21 import stream
-
-from models import Models
-from preprocess import *
+import matplotlib.pyplot as plt
 
 
 def normalize(n, max_n=1.0, min_n=-1.0, max_z=114):
@@ -13,7 +12,8 @@ def normalize(n, max_n=1.0, min_n=-1.0, max_z=114):
     z = z * max_z
     return z
 
-def load_notes(filepath="testdata"):
+
+def load_notes(filepath="data"):
     # Load dataset
     notes = get_notes(filepath)
     # Preprocess notes
@@ -49,7 +49,7 @@ def generate_fake_samples(generator, latent_dim, n):
     return x, y
 
 
-def create_sample(prediction_output, filename):
+def create_midi(prediction_output, filename):
     offset = 0
     output_notes = []
 
@@ -105,8 +105,8 @@ def summarize_performance(epoch, input_notes, generator, latent_dim=1000):
     # Convert predicted notes to index (normalize)
     pred_notes = [(x * norm_range + norm_range) for x in predictions[0]]
 
-    # pred_notes = [int_to_note[int(x)] for x in pred_notes]
-    pred_notes = [x for x in pred_notes]
+    pred_notes = [int_to_note[int(x)] for x in pred_notes]
+    # pred_notes = [x for x in pred_notes]
 
     # Save the generator weights
     filename = "weights/generator_model_%03d.h5" % (epoch)
@@ -114,26 +114,31 @@ def summarize_performance(epoch, input_notes, generator, latent_dim=1000):
 
     filename = "sample_epoch_%s" % str(epoch)
 
-    # Create a midi sample
-    create_midi_sample(pred_notes, filename)
+    # Create a midi file
+    create_midi(pred_notes, filename)
 
 
-def plot_progress(disc_loss, gen_loss, epochs):
-    plt.plot(self.disc_loss, c='red')
-    plt.plot(self.gen_loss, c='blue')
+def plot_progress(disc_loss_real, disc_loss_fake, gen_loss, epochs=100):
+    plt.plot(disc_loss_real, c='red')
+    plt.plot(disc_loss_fake, c='orange')
+    plt.plot(gen_loss, c='blue')
     plt.title("GAN Loss per Epoch")
-    plt.legend(['Discriminator', 'Generator'])
-    plt.xlabel('Epoch')
+    plt.legend(['Discriminator (Real)', 'Discriminator (Fake)', 'Generator'])
     plt.xlim(0, epochs)
+    plt.ylim(0, 1)
+    plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.savefig('GAN_Loss_per_Epoch_final.png', transparent=True)
+    plt.show()
     plt.close()
 
 
-def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=100, sample_interval=50):
+#     1000 epochs and generator/discriminator appear to be in equilibrium (~20 mins)
+def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=1000, sample_interval=50):
 
     # Disc and Gen loss lists for graph plot
-    disc_loss = []
+    disc_loss_real = []
+    disc_loss_fake = []
     gen_loss = []
 
     # Ground truths
@@ -154,6 +159,8 @@ def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=
 
         # Update discriminator relative to REAL
         d_loss_real, _ = discriminator.train_on_batch(x_real, y_real)
+
+        # print("Discriminator loss calculation complete.")
 
         # Get fake samples
         x_fake, y_fake = generate_fake_samples(
@@ -182,23 +189,30 @@ def train(gan, generator, discriminator, dataset, notes, batch_size=128, epochs=
             time_per_epoch = epoch_time / epoch
 
         # Print time of epoch
-        print("[INFO] Epoch time: %s seconds" % str(epoch_time))
+        print("[INFO] Epoch time: {:1.2f} seconds".format(epoch_time))
 
         # Estimate completion time
         print("[INFO] Estimated completion time: %s seconds" %
-              str(datetime.timedelta(seconds = time_per_epoch * epochs)))
+              str(datetime.timedelta(seconds=math.floor(time_per_epoch * (epochs - epoch)))))
 
-        disc_loss.append(d_loss_total)
+        disc_loss_real.append(d_loss_real)
+        disc_loss_fake.append(d_loss_fake)
         gen_loss.append(g_loss)
 
         if epoch % sample_interval == 0:
             summarize_performance(epoch, notes, generator)
 
-    plot_progress(d_loss, g_loss, epochs)
+    print("-------------------------")
+    print("[INFO] Training complete.")
+    print("[INFO] Total time: %s" %
+          str(datetime.timedelta(seconds=math.floor(time.time() - start))))
+
+    plot_progress(disc_loss_real, disc_loss_fake, gen_loss, epochs)
 
 
-dataset, notes = load_notes()
-models = Models(rows=100)
+dataset, notes = load_notes("data_2.0")
+# dataset, notes = load_notes()
+models = Models()
 discriminator = models.discriminator()
 generator = models.generator()
 gan = models.gan(generator, discriminator)

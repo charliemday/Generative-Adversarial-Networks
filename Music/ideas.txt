@@ -1,0 +1,8 @@
+
+1.0 Usually the ratio between Generator and Discriminator is 1-to-1
+    however what if you try a ratio of 5 discriminator iterations to 1
+    generator iteration
+
+1.1 Try out a DCGAN on audio
+
+1.2 Tune some hyper-parameters
