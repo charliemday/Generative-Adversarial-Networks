@@ -1,7 +1,3 @@
-Music/Pokemon MIDIs
-Music/testdata
-Music/.gitignore
-Music/data
-Pokemon
-images
-CatsDogs
+# Ignore all large datasets
+Music_GAN/Training_Data
+Music_GAN/GAN
